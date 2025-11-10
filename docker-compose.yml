@@ -50,11 +50,11 @@ services:
     command:
       - sh
       - -c
-      - "mkdir -p /data && chmod 777 /data && sleep infinity"
+      - "mkdir -p /data && sleep infinity"
     networks:
       - vectorsmith-tests
     volumes:
-      - ./\.docker/sqlite/data:/data
+      - sqlite-data:/data
     healthcheck:
       test:
         [
