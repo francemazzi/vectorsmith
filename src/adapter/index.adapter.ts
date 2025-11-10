@@ -4,17 +4,20 @@ import {
   type PgVectorAdapterConfig,
 } from "./pg_vector.adpater";
 import { QdrantAdapter, type QdrantAdapterConfig } from "./qdrant.adapter";
+import { SqliteAdapter, type SqliteAdapterConfig } from "./sqlite.adapter";
 
 export interface VectorSmithAdapterConfig {
   redis?: RedisAdapterConfig;
   pgvector?: PgVectorAdapterConfig;
   qdrant?: QdrantAdapterConfig;
+  sqlite?: SqliteAdapterConfig;
 }
 
 export class VectorSmithAdapter {
   private redis?: RedisAdapter;
   private pgvector?: PgVectorAdapter;
   private qdrant?: QdrantAdapter;
+  private sqlite?: SqliteAdapter;
   private readonly config: VectorSmithAdapterConfig;
 
   public constructor(config: VectorSmithAdapterConfig = {}) {
@@ -26,6 +29,10 @@ export class VectorSmithAdapter {
 
     if (config.pgvector) {
       this.pgvector = new PgVectorAdapter(config.pgvector);
+    }
+
+    if (config.sqlite) {
+      this.sqlite = new SqliteAdapter(config.sqlite);
     }
 
     if (config.qdrant) {
@@ -42,6 +49,14 @@ export class VectorSmithAdapter {
 
     if (this.pgvector) {
       connections.push(this.pgvector.connect());
+    }
+
+    if (this.sqlite) {
+      connections.push(
+        Promise.resolve().then(() => {
+          this.sqlite!.connect();
+        })
+      );
     }
 
     if (this.qdrant) {
@@ -68,6 +83,14 @@ export class VectorSmithAdapter {
       disconnections.push(this.pgvector.disconnect());
     }
 
+    if (this.sqlite?.isConnected()) {
+      disconnections.push(
+        Promise.resolve().then(() => {
+          this.sqlite!.disconnect();
+        })
+      );
+    }
+
     if (this.qdrant?.isConnected()) {
       disconnections.push(this.qdrant.disconnect());
     }
@@ -89,6 +112,13 @@ export class VectorSmithAdapter {
     return this.pgvector;
   }
 
+  public getSqlite(): SqliteAdapter {
+    if (!this.sqlite) {
+      throw new Error("SQLite adapter is not configured.");
+    }
+    return this.sqlite;
+  }
+
   public getQdrant(): QdrantAdapter {
     if (!this.qdrant) {
       throw new Error("Qdrant adapter is not configured.");
@@ -105,6 +135,10 @@ export class VectorSmithAdapter {
 
     if (this.pgvector) {
       connected = connected || this.pgvector.isConnected();
+    }
+
+    if (this.sqlite) {
+      connected = connected || this.sqlite.isConnected();
     }
 
     if (this.qdrant) {

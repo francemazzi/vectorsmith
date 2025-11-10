@@ -40,6 +40,7 @@
   },
   "homepage": "https://github.com/francemazzi/vectorsmith#readme",
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^24.10.0",
     "@types/pg": "^8.15.6",
     "@types/redis": "^4.0.10",
@@ -52,7 +53,12 @@
   },
   "dependencies": {
     "@qdrant/js-client-rest": "^1.15.1",
+    "@sqliteai/sqlite-vector": "^0.9.52",
+    "better-sqlite3": "^11.7.0",
     "pg": "^8.16.3",
     "redis": "^5.9.0"
+  },
+  "optionalDependencies": {
+    "@sqliteai/sqlite-vector-darwin-arm64": "^0.9.52"
   }
 }
