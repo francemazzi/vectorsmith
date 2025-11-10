@@ -1,0 +1,57 @@
+{
+  "name": "vectorsmith",
+  "version": "1.0.0",
+  "description": "Utility library per operazioni vettoriali in TypeScript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "tsc --noEmit",
+    "prepare": "npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run test/integration",
+    "test:ui": "vitest --ui",
+    "test:quick": "ts-node test-quick.ts",
+    "docker:up": "docker compose --env-file .env.test.local up -d",
+    "docker:down": "docker compose --env-file .env.test.local down",
+    "docker:reset": "npm run docker:down -- --volumes && npm run docker:up"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/francemazzi/vectorsmith.git"
+  },
+  "keywords": [
+    "vector",
+    "geometry",
+    "typescript",
+    "library"
+  ],
+  "author": "Francesco Mazzi",
+  "license": "MIT",
+  "type": "commonjs",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "bugs": {
+    "url": "https://github.com/francemazzi/vectorsmith/issues"
+  },
+  "homepage": "https://github.com/francemazzi/vectorsmith#readme",
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.6",
+    "@types/redis": "^4.0.10",
+    "@vitest/ui": "^4.0.8",
+    "rimraf": "^6.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
+  },
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.15.1",
+    "pg": "^8.16.3",
+    "redis": "^5.9.0"
+  }
+}

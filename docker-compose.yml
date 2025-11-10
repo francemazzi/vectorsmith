@@ -1,0 +1,94 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: vectorsmith-redis
+    command:
+      - redis-server
+      - "--save"
+      - "60"
+      - "1"
+      - "--loglevel"
+      - warning
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - vectorsmith-tests
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+
+  postgres:
+    image: ankane/pgvector:latest
+    container_name: vectorsmith-postgres
+    environment:
+      POSTGRES_USER: ${PG_USER:-vectorsmith}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-vectorsmith}
+      POSTGRES_DB: ${PG_DB:-vectorsmith}
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    networks:
+      - vectorsmith-tests
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER:-vectorsmith}"]
+      interval: 5s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  sqlite:
+    image: keinos/sqlite3:latest
+    container_name: vectorsmith-sqlite
+    command:
+      - sh
+      - -c
+      - "mkdir -p /data && chmod 777 /data && sleep infinity"
+    networks:
+      - vectorsmith-tests
+    volumes:
+      - ./\.docker/sqlite/data:/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "sqlite3 /data/test.db '.databases' || sqlite3 /data/test.db '.databases'",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  qdrant:
+    image: qdrant/qdrant:v1.9.0
+    container_name: vectorsmith-qdrant
+    ports:
+      - "${QDRANT_HTTP_PORT:-6333}:6333"
+      - "${QDRANT_GRPC_PORT:-6334}:6334"
+    networks:
+      - vectorsmith-tests
+    volumes:
+      - qdrant-data:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:6333/collections"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+networks:
+  vectorsmith-tests:
+    driver: bridge
+
+volumes:
+  redis-data:
+  postgres-data:
+  sqlite-data:
+  qdrant-data:
